@@ -18,7 +18,7 @@ module CompositePrimaryKeys
             sql = "SELECT COUNT(*) FROM (SELECT DISTINCT #{quoted_table_columns(primary_key)}"
           end
           
-          sql << " FROM #{table_name} "
+          sql << " FROM #{quoted_table_name} "
           sql << join_dependency.join_associations.collect{|join| join.association_join }.join
           
           add_joins!(sql, options, scope)
@@ -36,7 +36,7 @@ module CompositePrimaryKeys
 
         def construct_finder_sql_with_included_associations(options, join_dependency)
           scope = scope(:find)
-          sql = "SELECT #{column_aliases(join_dependency)} FROM #{(scope && scope[:from]) || options[:from] || table_name} "
+          sql = "SELECT #{column_aliases(join_dependency)} FROM #{(scope && scope[:from]) || options[:from] || quoted_table_name} "
           sql << join_dependency.join_associations.collect{|join| join.association_join }.join
  
           add_joins!(sql, options, scope)
@@ -51,7 +51,7 @@ module CompositePrimaryKeys
         end
         
         def table_columns(columns)
-          columns.collect {|column| "#{self.table_name}.#{column}"}
+          columns.collect {|column| "#{self.quoted_table_name}.#{connection.quote_column_name(column)}"}
         end
         
         def quoted_table_columns(columns)
@@ -208,7 +208,13 @@ module ActiveRecord::Associations::ClassMethods
       end
       
       def full_keys(table_name, keys)
-        keys.is_a?(Array) ? keys.collect {|key| "#{table_name}.#{key}"}.join(CompositePrimaryKeys::ID_SEP) : "#{table_name}.#{keys}"
+        connection = reflection.active_record.connection
+        quoted_table_name = connection.quote_table_name(table_name)
+        if keys.is_a?(Array) 
+          keys.collect {|key| "#{quoted_table_name}.#{connection.quote_column_name(key)}"}.join(CompositePrimaryKeys::ID_SEP) 
+        else
+          "#{quoted_table_name}.#{connection.quote_column_name(keys)}"
+        end
       end
 
       def composite_join_clause(full_keys1, full_keys2)
@@ -257,29 +263,41 @@ module ActiveRecord::Associations
     end
 
     def full_composite_join_clause(table1, full_keys1, table2, full_keys2)
+      connection = @reflection.active_record.connection
       full_keys1 = full_keys1.split(CompositePrimaryKeys::ID_SEP) if full_keys1.is_a?(String)
       full_keys2 = full_keys2.split(CompositePrimaryKeys::ID_SEP) if full_keys2.is_a?(String)
+
+      quoted1 = connection.quote_table_name(table1)
+      quoted2 = connection.quote_table_name(table2)
       
       where_clause = [full_keys1, full_keys2].transpose.map do |key_pair|
-        "#{table1}.#{key_pair.first}=#{table2}.#{key_pair.last}"
+        "#{quoted1}.#{connection.quote_column_name(key_pair.first)}=#{quoted2}.#{connection.quote_column_name(key_pair.last)}"
       end.join(" AND ")
       
       "(#{where_clause})"
     end
     
     def full_keys(table_name, keys)
+      connection = @reflection.active_record.connection
+      quoted_table_name = connection.quote_table_name(table_name)
       keys = keys.split(CompositePrimaryKeys::ID_SEP) if keys.is_a?(String)
-      keys.is_a?(Array) ? keys.collect {|key| "#{table_name}.#{key}"}.join(CompositePrimaryKeys::ID_SEP) : "#{table_name}.#{keys}"
+      if keys.is_a?(Array) 
+        keys.collect {|key| "#{quoted_table_name}.#{connection.quote_column_name(key)}"}.join(CompositePrimaryKeys::ID_SEP) 
+      else
+        "#{quoted_table_name}.#{connection.quote_column_name(keys)}"
+      end
     end
     
     def full_columns_equals(table_name, keys, quoted_ids)
+      connection = @reflection.active_record.connection
+      quoted_table_name = connection.quote_table_name(table_name)
       if keys.is_a?(Symbol) or (keys.is_a?(String) and keys == keys.to_s.split(CompositePrimaryKeys::ID_SEP))
-        return "#{table_name}.#{keys} = #{quoted_ids}"
+        return "#{quoted_table_name}.#{connection.quote_column_name(keys)} = #{quoted_ids}"
       end
       keys = keys.split(CompositePrimaryKeys::ID_SEP) if keys.is_a?(String)
       quoted_ids = quoted_ids.split(CompositePrimaryKeys::ID_SEP) if quoted_ids.is_a?(String)
       keys_ids = [keys, quoted_ids].transpose
-      keys_ids.collect {|key, id| "(#{table_name}.#{key} = #{id})"}.join(' AND ')
+      keys_ids.collect {|key, id| "(#{quoted_table_name}.#{connection.quote_column_name(key)} = #{id})"}.join(' AND ')
     end 
 
     def set_belongs_to_association_for(record)
@@ -304,7 +322,7 @@ module ActiveRecord::Associations
         @finder_sql << " AND (#{conditions})" if conditions
       end
 
-      @join_sql = "INNER JOIN #{@reflection.options[:join_table]} ON " +
+      @join_sql = "INNER JOIN #{@reflection.active_record.connection.quote_table_name(@reflection.options[:join_table])} ON " +
       full_composite_join_clause(@reflection.klass.table_name, @reflection.klass.primary_key, @reflection.options[:join_table], @reflection.association_foreign_key)
     end    
   end
@@ -317,8 +335,8 @@ module ActiveRecord::Associations
 
         when @reflection.options[:as]
           @finder_sql = 
-            "#{@reflection.klass.table_name}.#{@reflection.options[:as]}_id = #{@owner.quoted_id} AND " + 
-            "#{@reflection.klass.table_name}.#{@reflection.options[:as]}_type = #{@owner.class.quote_value(@owner.class.base_class.name.to_s)}"
+            "#{@reflection.klass.quoted_table_name}.#{@reflection.options[:as]}_id = #{@owner.quoted_id} AND " + 
+            "#{@reflection.klass.quoted_table_name}.#{@reflection.options[:as]}_type = #{@owner.class.quote_value(@owner.class.base_class.name.to_s)}"
           @finder_sql << " AND (#{conditions})" if conditions
             
         else
@@ -337,25 +355,29 @@ module ActiveRecord::Associations
       end
     end
     
-	def delete_records(records)
-	  if @reflection.options[:dependent]
-		records.each { |r| r.destroy }
-	  else
-		field_names = @reflection.primary_key_name.split(',')
-		field_names.collect! {|n| n + " = NULL"}
-		records.each do |r|
-		  where_class = nil
-		  
-		  if r.quoted_id.include?(',')
-		    where_class = [@reflection.klass.primary_key, r.quoted_id].transpose.map {|pair| "(#{pair[0]} = #{pair[1]})"}.join(" AND ")
-		  else
-		    where_class = @reflection.klass.primary_key + ' = ' +  r.quoted_id
-		  end
-		  
-		  @reflection.klass.update_all(  field_names.join(',') , where_class)
-		end
-	  end
-	end
+    def delete_records(records)
+      if @reflection.options[:dependent]
+        records.each { |r| r.destroy }
+      else
+        connection = @reflection.active_record.connection
+        field_names = @reflection.primary_key_name.split(',')
+        field_names.collect! {|n| connection.quote_column_name(n) + " = NULL"}
+        records.each do |r|
+          where_clause = nil
+          
+          if r.quoted_id.include?(',')
+            where_clause_terms = [@reflection.klass.primary_key, r.quoted_id].transpose.map do |pair|
+              "(#{connection.quote_column_name(pair[0])} = #{pair[1]})"
+            end
+            where_clause = where_clause_terms.join(" AND ")
+          else
+            where_clause = connection.quote_column_name(@reflection.klass.primary_key) + ' = ' +  r.quoted_id
+          end
+          
+          @reflection.klass.update_all(  field_names.join(',') , where_clause)
+        end
+      end
+    end
   end
   
   class HasOneAssociation < BelongsToAssociation #:nodoc:
@@ -363,8 +385,8 @@ module ActiveRecord::Associations
       case
         when @reflection.options[:as]
           @finder_sql = 
-            "#{@reflection.klass.table_name}.#{@reflection.options[:as]}_id = #{@owner.quoted_id} AND " + 
-            "#{@reflection.klass.table_name}.#{@reflection.options[:as]}_type = #{@owner.class.quote_value(@owner.class.base_class.name.to_s)}"          
+            "#{@reflection.klass.quoted_table_name}.#{@reflection.options[:as]}_id = #{@owner.quoted_id} AND " + 
+            "#{@reflection.klass.quoted_table_name}.#{@reflection.options[:as]}_type = #{@owner.class.quote_value(@owner.class.base_class.name.to_s)}"
         else
           @finder_sql = full_columns_equals(@reflection.klass.table_name, @reflection.primary_key_name, @owner.quoted_id)
       end
@@ -376,7 +398,7 @@ module ActiveRecord::Associations
   class HasManyThroughAssociation < HasManyAssociation #:nodoc:
     def construct_conditions_with_composite_keys
       if @reflection.through_reflection.options[:as]
-        construct_conditions_without_composite_keys;
+        construct_conditions_without_composite_keys
       else
         conditions = full_columns_equals(@reflection.through_reflection.table_name, @reflection.through_reflection.primary_key_name, @owner.quoted_id)
         conditions << " AND (#{sql_conditions})" if sql_conditions
@@ -398,7 +420,7 @@ module ActiveRecord::Associations
         end
 
         "INNER JOIN %s ON %s #{@reflection.options[:joins]} #{custom_joins}" % [
-          @reflection.through_reflection.table_name,
+          @reflection.through_reflection.quoted_table_name,
           composite_join_clause(full_keys(@reflection.table_name, reflection_primary_key), full_keys(@reflection.through_reflection.table_name, source_primary_key))
         ]
       end
