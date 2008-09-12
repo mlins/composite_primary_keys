@@ -1,0 +1,7 @@
+cpk:
+  articleId: 1
+  groupId: 1
+
+transformers:
+  articleId: 1
+  groupId: 2

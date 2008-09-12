@@ -6,16 +6,16 @@ require 'fixtures/tariff'
 require 'fixtures/product_tariff'
 
 class TestAttributes < Test::Unit::TestCase
-  fixtures :reference_types, :reference_codes, :products, :tariffs, :product_tariffs
+  fixtures :ReferenceType, :ReferenceCode, :Product, :Tariff, :ProductTariff
   
   CLASSES = {
     :single => {
       :class => ReferenceType,
-      :primary_keys => :reference_type_id,
+      :primary_keys => :referenceTypeId,
     },
     :dual   => { 
       :class => ReferenceCode,
-      :primary_keys => [:reference_type_id, :reference_code],
+      :primary_keys => [:referenceTypeId, :referenceCode],
     },
   }
   
@@ -50,7 +50,7 @@ class TestAttributes < Test::Unit::TestCase
   def test_brackets_foreign_key_assignment
     @flat = Tariff.find(1, Date.today.to_s(:db))
     @second_free = ProductTariff.find(2,2,Date.today.to_s(:db))
-    @second_free_fk = [:tariff_id, :tariff_start_date]
+    @second_free_fk = [:tariffId, :tariffStartDate]
     @second_free[key = @second_free_fk] = @flat.id
       compare_indexes('@flat', @flat.class.primary_key, '@second_free', @second_free_fk)
       assert_equal @flat.id, @second_free[key]

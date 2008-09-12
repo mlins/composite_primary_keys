@@ -1,6 +1,8 @@
 class Restaurant < ActiveRecord::Base
-  set_primary_keys :franchise_id, :store_id
+  set_table_name "Restaurant"
+  set_primary_keys :franchiseId, :storeId
   has_and_belongs_to_many :suburbs, 
-    :foreign_key => [:franchise_id, :store_id],  
-    :association_foreign_key => [:city_id, :suburb_id]
+    :join_table => 'RestaurantSuburb',
+    :foreign_key => [:franchiseId, :storeId],  
+    :association_foreign_key => [:cityId, :suburbId]
 end

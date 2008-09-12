@@ -1,0 +1,15 @@
+first:
+  id: 1
+  cityId: 1
+  suburbId: 1
+  name: First Street
+second1:
+  id: 2
+  cityId: 2
+  suburbId: 1
+  name: First Street
+second2:
+  id: 3
+  cityId: 2
+  suburbId: 1
+  name: Second Street

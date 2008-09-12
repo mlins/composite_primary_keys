@@ -3,20 +3,20 @@ require 'fixtures/reference_type'
 require 'fixtures/reference_code'
 
 class TestIds < Test::Unit::TestCase
-  fixtures :reference_types, :reference_codes
+  fixtures :ReferenceType, :ReferenceCode
   
   CLASSES = {
     :single => {
       :class => ReferenceType,
-      :primary_keys => [:reference_type_id],
+      :primary_keys => [:referenceTypeId],
     },
     :dual   => { 
       :class => ReferenceCode,
-      :primary_keys => [:reference_type_id, :reference_code],
+      :primary_keys => [:referenceTypeId, :referenceCode],
     },
     :dual_strs   => { 
       :class => ReferenceCode,
-      :primary_keys => ['reference_type_id', 'reference_code'],
+      :primary_keys => ['referenceTypeId', 'referenceCode'],
     },
   }
   
@@ -39,7 +39,11 @@ class TestIds < Test::Unit::TestCase
   
   def test_ids_to_s
     testing_with do
-      order = @klass.primary_key.is_a?(String) ? @klass.primary_key : @klass.primary_key.join(',')
+      order = if @klass.primary_key.is_a?(String)
+                ActiveRecord::Base.connection.quote_column_name(@klass.primary_key)
+              else  
+                @klass.primary_key.map { |k| ActiveRecord::Base.connection.quote_column_name(k) }.join(',')
+              end
       to_test = @klass.find(:all, :order => order)[0..1].map(&:id)
       assert_equal '(1,1),(1,2)', @klass.ids_to_s(to_test) if @key_test == :dual
       assert_equal '1,1;1,2', @klass.ids_to_s(to_test, ',', ';', '', '') if @key_test == :dual

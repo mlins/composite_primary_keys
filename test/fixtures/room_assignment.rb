@@ -1,4 +1,6 @@
 class RoomAssignment < ActiveRecord::Base
-  belongs_to :student
-  belongs_to :room, :foreign_key => [:dorm_id, :room_id]
+  set_table_name "RoomAssignment"
+  set_primary_key :studentId
+  belongs_to :student, :foreign_key => :studentId
+  belongs_to :room, :foreign_key => [:dormId, :roomId]
 end

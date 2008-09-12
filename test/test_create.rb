@@ -5,18 +5,18 @@ require 'fixtures/street'
 require 'fixtures/suburb'
 
 class TestCreate < Test::Unit::TestCase
-  fixtures :reference_types, :reference_codes, :streets, :suburbs
+  fixtures :ReferenceType, :ReferenceCode, :Street, :Suburb
   
   CLASSES = {
     :single => {
       :class => ReferenceType,
-      :primary_keys => :reference_type_id,
-      :create => {:reference_type_id => 10, :type_label => 'NEW_TYPE', :abbreviation => 'New Type'}
+      :primary_keys => :referenceTypeId,
+      :create => {:referenceTypeId => 10, :typeLabel => 'NEW_TYPE', :abbreviation => 'New Type'}
     },
     :dual   => { 
       :class => ReferenceCode,
-      :primary_keys => [:reference_type_id, :reference_code],
-      :create => {:reference_type_id => 1, :reference_code => 20, :code_label => 'NEW_CODE', :abbreviation => 'New Code'}
+      :primary_keys => [:referenceTypeId, :referenceCode],
+      :create => {:referenceTypeId => 1, :referenceCode => 20, :codeLabel => 'NEW_CODE', :abbreviation => 'New Code'}
     },
   }
   
@@ -55,14 +55,14 @@ class TestCreate < Test::Unit::TestCase
     suburb = Suburb.find(:first)
     suburb.streets.create(:name => "my street")
     street = Street.find_by_name('my street')
-    assert_equal(suburb.city_id, street.city_id)
-    assert_equal(suburb.suburb_id, street.suburb_id)
+    assert_equal(suburb.cityId, street.cityId)
+    assert_equal(suburb.suburbId, street.suburbId)
   end
   
   def test_create_on_association_when_belongs_to_is_single_key
     rt = ReferenceType.find(:first)
-    rt.reference_codes.create(:reference_code => 4321, :code_label => 'foo', :abbreviation => 'bar')
-    rc = ReferenceCode.find_by_reference_code(4321)
-    assert_equal(rc.reference_type_id, rt.reference_type_id)
+    rt.reference_codes.create(:referenceCode => 4321, :codeLabel => 'foo', :abbreviation => 'bar')
+    rc = ReferenceCode.find_by_referenceCode(4321)
+    assert_equal(rc.referenceTypeId, rt.referenceTypeId)
   end
 end

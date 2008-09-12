@@ -1,5 +1,6 @@
 class User < ActiveRecord::Base
-  has_many :readings
+  set_table_name "User"
+  has_many :readings, :foreign_key => :userId
   has_many :articles, :through => :readings
   has_many :comments, :as => :person
   has_many :hacks, :through => :comments, :source => :hack

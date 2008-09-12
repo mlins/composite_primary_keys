@@ -4,20 +4,20 @@ require 'fixtures/reference_code'
 
 # Testing the find action on composite ActiveRecords with two primary keys
 class TestFind < Test::Unit::TestCase
-  fixtures :reference_types, :reference_codes
+  fixtures :ReferenceType, :ReferenceCode
   
   CLASSES = {
     :single => {
       :class => ReferenceType,
-      :primary_keys => [:reference_type_id],
+      :primary_keys => [:referenceTypeId],
     },
     :dual   => { 
       :class => ReferenceCode,
-      :primary_keys => [:reference_type_id, :reference_code],
+      :primary_keys => [:referenceTypeId, :referenceCode],
     },
     :dual_strs   => { 
       :class => ReferenceCode,
-      :primary_keys => ['reference_type_id', 'reference_code'],
+      :primary_keys => ['referenceTypeId', 'referenceCode'],
     },
   }
   

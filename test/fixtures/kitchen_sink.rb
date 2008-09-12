@@ -1,3 +1,4 @@
 class KitchenSink < ActiveRecord::Base
-  set_primary_keys :id_1, :id_2
+  set_table_name "KitchenSink"
+  set_primary_keys :id1, :id2
 end

@@ -1,3 +1,4 @@
 class MembershipStatus < ActiveRecord::Base
-	belongs_to :membership, :foreign_key => [:user_id, :group_id]
+  set_table_name "MembershipStatus"
+	belongs_to :membership, :foreign_key => [:userId, :groupId]
 end

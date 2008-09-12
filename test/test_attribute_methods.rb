@@ -3,20 +3,20 @@ require 'fixtures/kitchen_sink'
 require 'fixtures/reference_type'
 
 class TestAttributeMethods < Test::Unit::TestCase
-  fixtures :kitchen_sinks, :reference_types
+  fixtures :KitchenSink, :ReferenceType
   
   def test_read_attribute_with_single_key
     rt = ReferenceType.find(1)
-    assert_equal(1, rt.reference_type_id)
-    assert_equal('NAME_PREFIX', rt.type_label)
+    assert_equal(1, rt.referenceTypeId)
+    assert_equal('NAME_PREFIX', rt.typeLabel)
     assert_equal('Name Prefix', rt.abbreviation)
   end
 
   def test_read_attribute_with_composite_keys
     sink = KitchenSink.find(1,2)
-    assert_equal(1, sink.id_1)
-    assert_equal(2, sink.id_2)
-    assert_equal(Date.today, sink.a_date)
-    assert_equal('string', sink.a_string)
+    assert_equal(1, sink.id1)
+    assert_equal(2, sink.id2)
+    assert_equal(Date.today, sink.aDate)
+    assert_equal('string', sink.aString)
   end
 end

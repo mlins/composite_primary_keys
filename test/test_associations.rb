@@ -16,26 +16,30 @@ require 'fixtures/user'
 require 'fixtures/reading'
 
 class TestAssociations < Test::Unit::TestCase
-  fixtures :articles, :products, :tariffs, :product_tariffs, :suburbs, :streets, :restaurants, :restaurants_suburbs,
-           :dorms, :rooms, :room_attributes, :room_attribute_assignments, :students, :room_assignments, :users, :readings
+  fixtures :Article, :Product, :Tariff, :ProductTariff, :Suburb, :Street, :Restaurant, :RestaurantSuburb,
+           :Dorm, :Room, :RoomAttribute, :RoomAttributeAssignment, :Student, :RoomAssignment, :User, :Reading
   
   def test_quoted_table_columns
-    assert_equal "product_tariffs.product_id,product_tariffs.tariff_id,product_tariffs.tariff_start_date", 
+    # This call now quotes table and column names and hence is now (or could be)
+    # vendor specific, but assume ANSI-compatible quoting for now.
+    assert_equal '"ProductTariff"."productId","ProductTariff"."tariffId","ProductTariff"."tariffStartDate"', 
         ProductTariff.send(:quoted_table_columns, ProductTariff.primary_key)
   end
   
   def test_has_many_through_with_conditions_when_through_association_is_not_composite
     user = User.find(:first)
-    assert_equal 1, user.articles.find(:all, :conditions => ["articles.name = ?", "Article One"]).size
+    assert_equal 1, user.articles.find(:all, :conditions => ['"Article".name = ?', "Article One"]).size
   end
 
   def test_has_many_through_with_conditions_when_through_association_is_composite
     room = Room.find(:first)
-    assert_equal 0, room.room_attributes.find(:all, :conditions => ["room_attributes.name != ?", "keg"]).size
+    assert_equal 0, room.room_attributes.find(:all, :conditions => ['"RoomAttribute".name != ?', "keg"]).size
   end
 
+  require 'ruby-debug'
   def test_has_many_through_on_custom_finder_when_through_association_is_composite_finder_when_through_association_is_not_composite
     user = User.find(:first)
+#    Kernel.debugger
     assert_equal 1, user.find_custom_articles.size
   end
 
@@ -47,30 +51,30 @@ class TestAssociations < Test::Unit::TestCase
   def test_count
     assert_equal 2, Product.count(:include => :product_tariffs)
     assert_equal 3, Tariff.count(:include => :product_tariffs)
-    assert_equal 2, Tariff.count(:group => :start_date).size
+    assert_equal 2, Tariff.count(:group => :startDate).size
   end
   
   def test_products
-    assert_not_nil products(:first_product).product_tariffs
-    assert_equal 2, products(:first_product).product_tariffs.length
-    assert_not_nil products(:first_product).tariffs
-    assert_equal 2, products(:first_product).tariffs.length
-    assert_not_nil products(:first_product).product_tariff
+    assert_not_nil Product(:first_product).product_tariffs
+    assert_equal 2, Product(:first_product).product_tariffs.length
+    assert_not_nil Product(:first_product).tariffs
+    assert_equal 2, Product(:first_product).tariffs.length
+    assert_not_nil Product(:first_product).product_tariff
   end
   
   def test_product_tariffs
-    assert_not_nil product_tariffs(:first_flat).product
-    assert_not_nil product_tariffs(:first_flat).tariff
-    assert_equal Product, product_tariffs(:first_flat).product.class
-    assert_equal Tariff, product_tariffs(:first_flat).tariff.class
+    assert_not_nil ProductTariff(:first_flat).product
+    assert_not_nil ProductTariff(:first_flat).tariff
+    assert_equal Product, ProductTariff(:first_flat).product.class
+    assert_equal Tariff, ProductTariff(:first_flat).tariff.class
   end
   
   def test_tariffs
-    assert_not_nil tariffs(:flat).product_tariffs
-    assert_equal 1, tariffs(:flat).product_tariffs.length
-    assert_not_nil tariffs(:flat).products
-    assert_equal 1, tariffs(:flat).products.length
-    assert_not_nil tariffs(:flat).product_tariff
+    assert_not_nil Tariff(:flat).product_tariffs
+    assert_equal 1, Tariff(:flat).product_tariffs.length
+    assert_not_nil Tariff(:flat).products
+    assert_equal 1, Tariff(:flat).products.length
+    assert_not_nil Tariff(:flat).product_tariff
   end
   
   # Its not generating the instances of associated classes from the rows
@@ -87,7 +91,7 @@ class TestAssociations < Test::Unit::TestCase
     assert_equal 3, @tariffs.length
     assert_not_nil @tariffs.first.instance_variable_get('@product_tariffs'), '@product_tariffs not set; should be array'
     assert_equal 3, @tariffs.inject(0) {|sum, tariff| sum + tariff.instance_variable_get('@product_tariffs').length}, 
-      "Incorrect number of product_tariffs returnedturned"
+      "Incorrect number of product_tariffs returned"
   end
   
   def test_find_includes_product
@@ -130,8 +134,8 @@ class TestAssociations < Test::Unit::TestCase
   	student = Student.find(:first)
   	rooms = student.rooms
   	assert_equal 1, rooms.size
-  	assert_equal 1, rooms.first.dorm_id
-  	assert_equal 1, rooms.first.room_id
+  	assert_equal 1, rooms.first.dormId
+  	assert_equal 1, rooms.first.roomId
   end
   
   def test_has_many_through_when_through_association_is_composite

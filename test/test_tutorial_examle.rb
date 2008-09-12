@@ -5,7 +5,7 @@ require 'fixtures/membership_status'
 require 'fixtures/membership'
 
 class TestTutorialExample < Test::Unit::TestCase
-  fixtures :users, :groups, :memberships, :membership_statuses
+  fixtures :User, :Group, :Membership, :MembershipStatus
   
   def test_membership
     assert(membership = Membership.find(1,1), "Cannot find a membership")

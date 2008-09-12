@@ -1,5 +1,6 @@
 class ProductTariff < ActiveRecord::Base
-	set_primary_keys :product_id, :tariff_id, :tariff_start_date
-	belongs_to :product, :foreign_key => :product_id
-	belongs_to :tariff,  :foreign_key => [:tariff_id, :tariff_start_date]
+  set_table_name "ProductTariff"
+	set_primary_keys :productId, :tariffId, :tariffStartDate
+	belongs_to :product, :foreign_key => :productId
+	belongs_to :tariff,  :foreign_key => [:tariffId, :tariffStartDate]
 end

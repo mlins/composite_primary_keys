@@ -1,3 +1,4 @@
 class Street < ActiveRecord::Base
-  belongs_to :suburb,  :foreign_key => [:city_id, :suburb_id]
+  set_table_name "Street"
+  belongs_to :suburb, :foreign_key => [:cityId, :suburbId]
 end

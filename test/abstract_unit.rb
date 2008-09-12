@@ -56,7 +56,11 @@ protected
     classes.keys.each do |@key_test|
       @klass_info = classes[@key_test]
       @klass, @primary_keys = @klass_info[:class], @klass_info[:primary_keys]
-      order = @klass.primary_key.is_a?(String) ? @klass.primary_key : @klass.primary_key.join(',')
+      order = if @klass.primary_key.is_a?(String)
+                ActiveRecord::Base.connection.quote_column_name(@klass.primary_key)
+              else  
+                @klass.primary_key.map { |k| ActiveRecord::Base.connection.quote_column_name(k) }.join(',')
+              end
       @first = @klass.find(:first, :order => order)
       yield
     end

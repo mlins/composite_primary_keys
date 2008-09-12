@@ -1,0 +1,12 @@
+first_flat:
+  productId: 1
+  tariffId: 1
+  tariffStartDate: <%= Date.today.to_s(:db) %>
+first_free:  
+  productId: 1
+  tariffId: 2
+  tariffStartDate: <%= Date.today.to_s(:db) %>
+second_free:
+  productId: 2
+  tariffId: 2
+  tariffStartDate: <%= Date.today.to_s(:db) %>

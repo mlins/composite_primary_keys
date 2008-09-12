@@ -1,4 +1,5 @@
 class Student < ActiveRecord::Base
-  has_many :room_assignments
-  has_many :rooms, :through => :room_assignments, :foreign_key => [:building_code, :room_number]
+  set_table_name "Student"
+  has_many :room_assignments, :foreign_key => :studentId
+  has_many :rooms, :through => :room_assignments, :foreign_key => [:buildingCode, :roomNumber]
 end

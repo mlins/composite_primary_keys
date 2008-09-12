@@ -1,0 +1,28 @@
+name_prefix_mr:
+  referenceTypeId: 1
+  referenceCode: 1
+  codeLabel: MR
+  abbreviation: Mr
+name_prefix_mrs:
+  referenceTypeId: 1
+  referenceCode: 2
+  codeLabel: MRS
+  abbreviation: Mrs
+name_prefix_ms:
+  referenceTypeId: 1
+  referenceCode: 3
+  codeLabel: MS
+  abbreviation: Ms
+  
+gender_male:
+  referenceTypeId: 2
+  referenceCode: 1
+  codeLabel: MALE
+  abbreviation: Male
+gender_female:
+  referenceTypeId: 2
+  referenceCode: 2
+  codeLabel: FEMALE
+  abbreviation: Female
+
+  

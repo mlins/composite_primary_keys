@@ -1,7 +1,8 @@
 class ReferenceCode < ActiveRecord::Base
-  set_primary_keys :reference_type_id, :reference_code
+  set_table_name "ReferenceCode"
+  set_primary_keys :referenceTypeId, :referenceCode
   
-  belongs_to :reference_type, :foreign_key => "reference_type_id"
+  belongs_to :reference_type, :foreign_key => :referenceTypeId
   
-  validates_presence_of :reference_code, :code_label, :abbreviation
+  validates_presence_of :referenceCode, :codeLabel, :abbreviation
 end

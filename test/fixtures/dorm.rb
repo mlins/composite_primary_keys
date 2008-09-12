@@ -1,3 +1,4 @@
 class Dorm < ActiveRecord::Base
-  has_many :rooms, :include => :room_attributes
+  set_table_name "Dorm"
+  has_many :rooms, :include => :room_attributes, :foreign_key => :dormId
 end

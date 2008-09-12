@@ -3,16 +3,16 @@ require 'fixtures/reference_type'
 require 'fixtures/reference_code'
 
 class TestMiscellaneous < Test::Unit::TestCase
-  fixtures :reference_types, :reference_codes, :products
+  fixtures :ReferenceType, :ReferenceCode, :Product
   
   CLASSES = {
     :single => {
       :class => ReferenceType,
-      :primary_keys => :reference_type_id,
+      :primary_keys => :referenceTypeId,
     },
     :dual   => { 
       :class => ReferenceCode,
-      :primary_keys => [:reference_type_id, :reference_code],
+      :primary_keys => [:referenceTypeId, :referenceCode],
     },
   }
   

@@ -4,7 +4,7 @@ require 'fixtures/reference_code'
 require 'plugins/pagination'
 
 class TestPagination < Test::Unit::TestCase
-  fixtures :reference_types, :reference_codes
+  fixtures :ReferenceType, :ReferenceCode
   
   include ActionController::Pagination
   DEFAULT_PAGE_SIZE = 2
@@ -14,13 +14,13 @@ class TestPagination < Test::Unit::TestCase
   CLASSES = {
     :single => {
       :class => ReferenceType,
-      :primary_keys => :reference_type_id,
-      :table => :reference_types,
+      :primary_keys => :referenceTypeId,
+      :table => :ReferenceType,
     },
     :dual   => { 
       :class => ReferenceCode,
-      :primary_keys => [:reference_type_id, :reference_code],
-      :table => :reference_codes,
+      :primary_keys => [:referenceTypeId, :referenceCode],
+      :table => :ReferenceCode,
     },
   }
   

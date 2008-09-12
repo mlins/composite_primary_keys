@@ -1,0 +1,9 @@
+employee1:
+  id: 1
+  departmentId: 1
+  locationId: 1
+employee2:
+  id: 2
+  departmentId: 1
+  locationId: 1
+

@@ -1,0 +1,16 @@
+comment1:
+  id: 1
+  personId: 1
+  personType: Employee
+  
+comment2:
+  id: 2
+  personId: 1
+  personType: User
+  hackId: andrew
+  
+comment3:
+  id: 3
+  personId: andrew
+  personType: Hack
+  

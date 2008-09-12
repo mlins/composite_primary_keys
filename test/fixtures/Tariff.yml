@@ -1,0 +1,13 @@
+flat:
+  tariffId: 1
+  startDate: <%= Date.today.to_s(:db) %>
+  amount: 50
+free:
+  tariffId: 2
+  startDate: <%= Date.today.to_s(:db) %>
+  amount: 0
+flat_future:
+  tariffId: 1
+  startDate: <%= Date.today.next.to_s(:db) %>
+  amount: 100
+  
