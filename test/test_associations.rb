@@ -19,13 +19,6 @@ class TestAssociations < Test::Unit::TestCase
   fixtures :Article, :Product, :Tariff, :ProductTariff, :Suburb, :Street, :Restaurant, :RestaurantSuburb,
            :Dorm, :Room, :RoomAttribute, :RoomAttributeAssignment, :Student, :RoomAssignment, :User, :Reading
   
-  def test_quoted_table_columns
-    # This call now quotes table and column names and hence is now (or could be)
-    # vendor specific, but assume ANSI-compatible quoting for now.
-    assert_equal '"ProductTariff"."productId","ProductTariff"."tariffId","ProductTariff"."tariffStartDate"', 
-        ProductTariff.send(:quoted_table_columns, ProductTariff.primary_key)
-  end
-  
   def test_has_many_through_with_conditions_when_through_association_is_not_composite
     user = User.find(:first)
     assert_equal 1, user.articles.find(:all, :conditions => ['"Article".name = ?', "Article One"]).size
