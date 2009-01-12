@@ -36,10 +36,8 @@ class TestAssociations < Test::Unit::TestCase
     assert_equal 0, room.room_attributes.find(:all, :conditions => ['"RoomAttribute".name != ?', "keg"]).size
   end
 
-  require 'ruby-debug'
   def test_has_many_through_on_custom_finder_when_through_association_is_composite_finder_when_through_association_is_not_composite
     user = User.find(:first)
-#    Kernel.debugger
     assert_equal 1, user.find_custom_articles.size
   end
 
